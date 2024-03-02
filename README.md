@@ -5,7 +5,7 @@ A standard library for instrumenting golang apps with OpenTelemetry
 
 ```go
 func main() {
-    cleanupTelemetry := telemetry.Start(ctx, AppName, Version)
+    cleanupTelemetry := telemetry.Init(ctx, AppName, Version)
     defer cleanupTelemetry()
     telemetry.WatchRuntime()
 	
