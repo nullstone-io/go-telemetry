@@ -15,7 +15,7 @@ const (
 	meterInterval = 1 * time.Second
 )
 
-func InitMetrics(ctx context.Context, app, version string) func(ctx context.Context) error {
+func StartMetrics(ctx context.Context, app, version string) func(ctx context.Context) error {
 	secureOption := otlpmetricgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
 	if len(insecure) > 0 {
 		secureOption = otlpmetricgrpc.WithInsecure()

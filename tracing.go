@@ -12,7 +12,7 @@ import (
 	"log"
 )
 
-func InitTracer(ctx context.Context, app, version string) func(context.Context) error {
+func StartTracer(ctx context.Context, app, version string) func(context.Context) error {
 	secureOption := otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
 	if len(insecure) > 0 {
 		secureOption = otlptracegrpc.WithInsecure()
