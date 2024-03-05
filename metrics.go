@@ -2,6 +2,7 @@ package telemetry
 
 import (
 	"context"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -15,7 +16,7 @@ const (
 	meterInterval = 1 * time.Second
 )
 
-func StartMetrics(ctx context.Context, app, version string) func(ctx context.Context) error {
+func StartMetrics(ctx context.Context, attrs ...attribute.KeyValue) func(ctx context.Context) error {
 	secureOption := otlpmetricgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
 	if len(insecure) > 0 {
 		secureOption = otlpmetricgrpc.WithInsecure()
@@ -28,9 +29,7 @@ func StartMetrics(ctx context.Context, app, version string) func(ctx context.Con
 	}
 
 	resources := resource.NewWithAttributes(semconv.SchemaURL,
-		semconv.ServiceName(app),
-		semconv.ServiceVersion(version),
-		semconv.TelemetrySDKLanguageGo)
+		append(attrs, semconv.TelemetrySDKLanguageGo)...)
 
 	read := metric.NewPeriodicReader(exporter, metric.WithInterval(meterInterval))
 	provider := metric.NewMeterProvider(metric.WithResource(resources), metric.WithReader(read))

@@ -3,6 +3,7 @@ package telemetry
 import (
 	"context"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -12,7 +13,7 @@ import (
 	"log"
 )
 
-func StartTracer(ctx context.Context, app, version string) func(context.Context) error {
+func StartTracer(ctx context.Context, attrs ...attribute.KeyValue) func(context.Context) error {
 	secureOption := otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
 	if len(insecure) > 0 {
 		secureOption = otlptracegrpc.WithInsecure()
@@ -27,9 +28,7 @@ func StartTracer(ctx context.Context, app, version string) func(context.Context)
 	}
 
 	resources := resource.NewWithAttributes(semconv.SchemaURL,
-		semconv.ServiceName(app),
-		semconv.ServiceVersion(version),
-		semconv.TelemetrySDKLanguageGo)
+		append(attrs, semconv.TelemetrySDKLanguageGo)...)
 
 	otel.SetTracerProvider(
 		sdktrace.NewTracerProvider(
