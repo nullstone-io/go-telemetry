@@ -2,40 +2,23 @@ package telemetry
 
 import (
 	"context"
+	"go.opentelemetry.io/contrib/exporters/autoexport"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/sdk/resource"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
-	"google.golang.org/grpc/credentials"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"log"
 )
 
-func StartTracer(ctx context.Context, attrs ...attribute.KeyValue) func(context.Context) error {
-	secureOption := otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
-	if len(insecure) > 0 {
-		secureOption = otlptracegrpc.WithInsecure()
-	}
-
-	exporter, err := otlptrace.New(ctx,
-		otlptracegrpc.NewClient(secureOption, otlptracegrpc.WithEndpoint(collectorURL)),
-	)
+func StartTracer(ctx context.Context, resources *resource.Resource) func(context.Context) error {
+	exporter, err := autoexport.NewSpanExporter(ctx)
 	if err != nil {
 		log.Printf("unable to create otlp trace exporter: %s\n", err)
 		return func(ctx context.Context) error { return nil }
 	}
-
-	resources := resource.NewWithAttributes(semconv.SchemaURL,
-		append(attrs, semconv.TelemetrySDKLanguageGo)...)
-
-	otel.SetTracerProvider(
-		sdktrace.NewTracerProvider(
-			sdktrace.WithSampler(sdktrace.AlwaysSample()),
-			sdktrace.WithBatcher(exporter),
-			sdktrace.WithResource(resources),
-		),
+	provider := trace.NewTracerProvider(
+		trace.WithResource(resources),
+		trace.WithBatcher(exporter),
 	)
-	return exporter.Shutdown
+	otel.SetTracerProvider(provider)
+	return provider.Shutdown
 }
