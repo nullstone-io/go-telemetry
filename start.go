@@ -3,6 +3,8 @@ package telemetry
 import (
 	"context"
 	"errors"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"log"
 )
@@ -12,6 +14,8 @@ func Start(ctx context.Context) func() {
 	if err != nil {
 		log.Fatalf("Error initializing OTEL resources: %s\n", err)
 	}
+
+	otel.SetTextMapPropagator(DetectPropagator(ctx))
 
 	shutdownTracer := StartTracer(ctx, resources)
 	shutdownMetrics := StartMetrics(ctx, resources)
@@ -42,4 +46,11 @@ func DetectResources(ctx context.Context) (*resource.Resource, error) {
 		return nil, err
 	}
 	return res, nil
+}
+
+func DetectPropagator(ctx context.Context) propagation.TextMapPropagator {
+	return propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	)
 }
