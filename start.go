@@ -3,13 +3,19 @@ package telemetry
 import (
 	"context"
 	"errors"
+	"log"
+
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"log"
 )
 
-func Start(ctx context.Context) func() {
+type Config struct {
+	EnableLogger bool
+	PackageName  string
+}
+
+func Start(ctx context.Context, cfg Config) func() {
 	resources, err := DetectResources(ctx)
 	if err != nil {
 		log.Fatalf("Error initializing OTEL resources: %s\n", err)
@@ -19,9 +25,11 @@ func Start(ctx context.Context) func() {
 
 	shutdownTracer := StartTracer(ctx, resources)
 	shutdownMetrics := StartMetrics(ctx, resources)
+	shutdownLogger := StartLogger(ctx, resources, cfg)
 	return func() {
-		shutdownTracer(ctx)
+		shutdownLogger(ctx)
 		shutdownMetrics(ctx)
+		shutdownTracer(ctx)
 	}
 }
 
