@@ -1,5 +1,6 @@
-// Package workflows is Nullstone's vocabulary for the outcome of a workflow or activity: who caused a failure, the customer (their code,
-// configuration, or cloud account) or Nullstone (a bug, infrastructure, an upstream dependency).
+// Package workflows is Nullstone's vocabulary for the outcome of a workflow or activity: who caused a
+// failure, the customer (their code, configuration, or cloud account) or Nullstone (a bug, infrastructure,
+// an upstream dependency).
 //
 // It is deliberately independent of any execution engine. Producers classify their errors
 // (Classifier, WithFailure, Match); the engine that observes an execution's outcome calls
