@@ -1,4 +1,4 @@
-package failure
+package workflows
 
 import (
 	"context"

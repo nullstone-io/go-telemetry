@@ -1,4 +1,4 @@
-// Package failure is Nullstone's vocabulary for who caused a failure: the customer (their code,
+// Package workflows is Nullstone's vocabulary for the outcome of a workflow or activity: who caused a failure, the customer (their code,
 // configuration, or cloud account) or Nullstone (a bug, infrastructure, an upstream dependency).
 //
 // It is deliberately independent of any execution engine. Producers classify their errors
@@ -9,7 +9,7 @@
 // The default is internal: a failure is only attributed to the user when a producer positively
 // identified it as such. An unrecognised error is most likely a Nullstone regression, and it
 // must page rather than blend in with customers' own failing builds and terraform runs.
-package failure
+package workflows
 
 import (
 	"context"
