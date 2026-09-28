@@ -37,35 +37,10 @@ func (c Class) IsFailure() bool {
 	return c == ClassUser || c == ClassInternal
 }
 
-// Categories form a bounded vocabulary shared by every service and by dashboards/alerts.
-// Add to this list rather than inventing ad hoc strings so charts can group on them.
+// Category is a free-form, low-cardinality label a service assigns to a failure (e.g. a build step or
+// the subsystem that broke). Each service owns its own bounded list of categories; this package only
+// defines the default.
 const (
-	// user categories
-	CategoryTerraformInit    = "terraform-init"
-	CategoryTerraformPlan    = "terraform-plan"
-	CategoryTerraformApply   = "terraform-apply"
-	CategoryCloudCredentials = "cloud-credentials"
-	CategoryConfig           = "config"
-	CategoryModuleContract   = "module-contract"
-	CategoryDependencyFailed = "dependency-failed"
-	CategoryCheckout         = "checkout"
-	CategoryDockerBuild      = "docker-build"
-	CategorySiteAssetsBuild  = "site-assets-build"
-	CategoryGithubActions    = "github-actions"
-	CategoryPushAuth         = "push-auth"
-	CategoryDeployRollout    = "deploy-rollout"
-	CategoryDeployTimeout    = "deploy-timeout"
-
-	// internal categories
-	CategoryDatabase       = "database"
-	CategoryPanic          = "panic"
-	CategoryApi            = "api"
-	CategoryTemporal       = "temporal"
-	CategoryProviderMirror = "provider-mirror"
-	CategoryStateBackend   = "state-backend"
-	CategoryDockerDaemon   = "docker-daemon"
-	CategoryUpstreamGithub = "upstream-github"
-	CategoryUpstreamCloud  = "upstream-cloud"
 	// CategoryUnknown is the default for anything not positively classified
 	CategoryUnknown = "unknown"
 )

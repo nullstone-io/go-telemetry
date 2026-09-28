@@ -21,11 +21,11 @@ type external struct{ Field string }
 func (e external) Error() string { return "invalid field " + e.Field }
 
 func init() {
-	Match[external](User(CategoryConfig))
+	Match[external](User("config"))
 }
 
 func TestClassify(t *testing.T) {
-	tfPlan := Info{Class: ClassUser, Category: CategoryTerraformPlan, Code: "Unsupported argument"}
+	tfPlan := Info{Class: ClassUser, Category: "terraform-plan", Code: "Unsupported argument"}
 	tests := map[string]struct {
 		err  error
 		want Info
@@ -39,12 +39,12 @@ func TestClassify(t *testing.T) {
 		"classifier wrapped in context":         {fmt.Errorf("running plan: %w", &selfClassified{Failure: tfPlan}), tfPlan},
 		"classifier with blank info is unknown": {&selfClassified{}, Unknown},
 		"classifier with class only":            {&selfClassified{Failure: Info{Class: ClassUser}}, Info{Class: ClassUser, Category: CategoryUnknown}},
-		"matcher":                               {external{Field: "vars"}, User(CategoryConfig)},
-		"matcher through wrapping":              {fmt.Errorf("parsing: %w", external{Field: "vars"}), User(CategoryConfig)},
-		"WithFailure":                           {WithFailure(errors.New("deployment failed"), User(CategoryDeployRollout)), User(CategoryDeployRollout)},
+		"matcher":                               {external{Field: "vars"}, User("config")},
+		"matcher through wrapping":              {fmt.Errorf("parsing: %w", external{Field: "vars"}), User("config")},
+		"WithFailure":                           {WithFailure(errors.New("deployment failed"), User("deploy-rollout")), User("deploy-rollout")},
 		"WithFailure bounds the code": {
-			WithFailure(errors.New("x"), Info{Class: ClassInternal, Category: CategoryDatabase, Code: strings.Repeat("a", 500)}),
-			Info{Class: ClassInternal, Category: CategoryDatabase, Code: strings.Repeat("a", MaxCodeLen)},
+			WithFailure(errors.New("x"), Info{Class: ClassInternal, Category: "database", Code: strings.Repeat("a", 500)}),
+			Info{Class: ClassInternal, Category: "database", Code: strings.Repeat("a", MaxCodeLen)},
 		},
 	}
 	for name, test := range tests {
@@ -57,11 +57,11 @@ func TestClassify(t *testing.T) {
 }
 
 func TestWithFailure(t *testing.T) {
-	if WithFailure(nil, User(CategoryConfig)) != nil {
+	if WithFailure(nil, User("config")) != nil {
 		t.Error("WithFailure(nil) should be nil")
 	}
 	sentinel := errors.New("deployment failed")
-	err := WithFailure(fmt.Errorf("watching rollout: %w", sentinel), User(CategoryDeployRollout))
+	err := WithFailure(fmt.Errorf("watching rollout: %w", sentinel), User("deploy-rollout"))
 	if !errors.Is(err, sentinel) {
 		t.Error("the wrapped chain should be kept")
 	}
@@ -69,14 +69,14 @@ func TestWithFailure(t *testing.T) {
 		t.Errorf("Error() = %q", err.Error())
 	}
 	// A deserialized ClassifiedError has no Err; its Message stands in
-	rehydrated := &ClassifiedError{Message: "deployment failed", Info: User(CategoryDeployRollout)}
+	rehydrated := &ClassifiedError{Message: "deployment failed", Info: User("deploy-rollout")}
 	if rehydrated.Error() != "deployment failed" {
 		t.Errorf("Error() = %q", rehydrated.Error())
 	}
 }
 
 func TestInfo_Attributes(t *testing.T) {
-	attrs := Info{Class: ClassUser, Category: CategoryDockerBuild, Code: "exit 1"}.Attributes(ErrorType(errors.New("x")))
+	attrs := Info{Class: ClassUser, Category: "docker-build", Code: "exit 1"}.Attributes(ErrorType(errors.New("x")))
 	got := map[string]string{}
 	for _, kv := range attrs {
 		got[string(kv.Key)] = kv.Value.AsString()
@@ -93,7 +93,7 @@ func TestInfo_Attributes(t *testing.T) {
 }
 
 func TestCompletionStatus(t *testing.T) {
-	for info, want := range map[Info]string{Cancelled: CompletionCancelled, Timeout: CompletionTimeout, Unknown: CompletionFailed, User(CategoryConfig): CompletionFailed} {
+	for info, want := range map[Info]string{Cancelled: CompletionCancelled, Timeout: CompletionTimeout, Unknown: CompletionFailed, User("config"): CompletionFailed} {
 		if got := CompletionStatus(info); got != want {
 			t.Errorf("CompletionStatus(%+v) = %q, want %q", info, got, want)
 		}

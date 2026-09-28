@@ -40,9 +40,9 @@ func Annotate(span trace.Span, info Info, err error) {
 
 // Metric names
 const (
-	MetricWorkflowCompletions = "nullstone.workflow.completions"
-	MetricWorkflowFailures    = "nullstone.workflow.failures"
-	MetricActivityFailures    = "nullstone.activity.failures"
+	MetricWorkflowCompletions = "workflow.completions"
+	MetricWorkflowFailures    = "workflow.failures"
+	MetricActivityFailures    = "workflow.activity.failures"
 )
 
 // Metric attribute keys. Deliberately low-cardinality: org/stack/env stay on spans only.
@@ -64,7 +64,7 @@ const (
 	CompletionTimeout   = "timeout"
 )
 
-const instrumentationName = "github.com/nullstone-io/go-telemetry/failure"
+const instrumentationName = "github.com/nullstone-io/go-telemetry/workflows"
 
 var (
 	workflowCompletions metric.Int64Counter = noop.Int64Counter{}

@@ -58,7 +58,7 @@ func attrsOf(dp metricdata.DataPoint[int64]) map[string]string {
 
 func TestRecordWorkflowCompletion(t *testing.T) {
 	ctx := context.Background()
-	RecordWorkflowCompletion(ctx, "wf-user", true, User(CategoryTerraformPlan), errors.New("bad hcl"))
+	RecordWorkflowCompletion(ctx, "wf-user", true, User("terraform-plan"), errors.New("bad hcl"))
 	RecordWorkflowCompletion(ctx, "wf-cancelled", true, Cancelled, errors.New("cancelled"))
 	RecordWorkflowCompletion(ctx, "wf-ok", false, Info{}, nil)
 
@@ -66,7 +66,7 @@ func TestRecordWorkflowCompletion(t *testing.T) {
 	if len(failures) != 1 || failures[0].Value != 1 {
 		t.Fatalf("expected one failure datapoint of 1, got %+v", failures)
 	}
-	if got := attrsOf(failures[0]); got[MetricAttrClass] != "user" || got[MetricAttrCategory] != CategoryTerraformPlan || got[MetricAttrRoot] != "true" {
+	if got := attrsOf(failures[0]); got[MetricAttrClass] != "user" || got[MetricAttrCategory] != "terraform-plan" || got[MetricAttrRoot] != "true" {
 		t.Errorf("failure attributes = %v", got)
 	}
 	if got := dataPoints(t, MetricWorkflowFailures, attribute.String(MetricAttrWorkflowType, "wf-cancelled")); len(got) != 0 {
@@ -82,11 +82,11 @@ func TestRecordWorkflowCompletion(t *testing.T) {
 
 func TestRecordActivityFailure(t *testing.T) {
 	ctx := context.Background()
-	RecordActivityFailure(ctx, "act-user", User(CategoryDockerBuild))
+	RecordActivityFailure(ctx, "act-user", User("docker-build"))
 	RecordActivityFailure(ctx, "act-cancelled", Cancelled)
 
 	failures := dataPoints(t, MetricActivityFailures, attribute.String(MetricAttrActivityType, "act-user"))
-	if len(failures) != 1 || attrsOf(failures[0])[MetricAttrCategory] != CategoryDockerBuild {
+	if len(failures) != 1 || attrsOf(failures[0])[MetricAttrCategory] != "docker-build" {
 		t.Errorf("expected one docker-build activity failure, got %+v", failures)
 	}
 	if got := dataPoints(t, MetricActivityFailures, attribute.String(MetricAttrActivityType, "act-cancelled")); len(got) != 0 {
