@@ -12,9 +12,9 @@ import (
 
 // Span attribute keys recorded on a failed execution's span
 const (
-	AttrClass     = "nullstone.failure.class"
-	AttrCategory  = "nullstone.failure.category"
-	AttrCode      = "nullstone.failure.code"
+	AttrClass     = "workflow.failure.class"
+	AttrCategory  = "workflow.failure.category"
+	AttrCode      = "workflow.failure.code"
 	AttrErrorType = "error.type"
 )
 
